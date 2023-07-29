@@ -52,3 +52,7 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
+/in_log/*
+/log/*
+/.vscode/*
+/out_xml/*
