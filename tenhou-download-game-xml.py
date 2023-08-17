@@ -50,6 +50,12 @@ p.add_option('-o', '--out_xml',
 p.add_option('-i', '--in_log',
         default=filedir+"\\in_log",
         help='Log from http://tenhou.net/sc/raw/')
+p.add_option('-p', '--out_json',
+        default=filedir+"\\out_json",
+        help='Directory in which to store downloaded JSON')
+p.add_option('-m', '--json',
+        default='False',
+        help='Store log in json format')
          
 opts, args = p.parse_args()
 if args:
@@ -72,6 +78,11 @@ if args:
 
 if not os.path.exists(opts.out_xml):
     os.makedirs(opts.out_xml)
+if not os.path.exists(opts.in_log):
+    os.makedirs(opts.in_log)
+if not os.path.exists(opts.out_json):
+    os.makedirs(opts.out_json)
+is_json = bool(opts.json)
 
 s = requests.Session()
 s.headers.clear()
@@ -99,9 +110,16 @@ for gz in glob.glob(opts.in_log + "\\scc*.html.gz"):
                 else:
                     print("Downloading game {}".format(game_id))
                     try:
-                        s.headers.update({'Referer':f"https://tenhou.net/4/?log={game_id}"})
-                        r = s.get('https://tenhou.net/0/log/?' + game_id)
-                        data = r.content
+                        data = b''
+                        if is_json:
+                            s.headers.update({'Referer':f"https://tenhou.net/"})
+                            r = s.get('https://tenhou.net/5/mjlog2json.cgi?' + game_id)
+                            data = r.content
+                            pass
+                        else:
+                            s.headers.update({'Referer':f"https://tenhou.net/4/?log={game_id}"})
+                            r = s.get('https://tenhou.net/0/log/?' + game_id)
+                            data = r.content
                         with open(target_fname, 'wb') as f:
                             f.write(data)
                     except HTTPError as e:
